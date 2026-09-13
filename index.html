@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Usta Xurshid — Santexnik xizmatlari</title>
+<style>
+  :root {
+    --bg: #eeece4;
+    --panel: #ffffff;
+    --ink: #1c1b19;
+    --ink-soft: #56534c;
+    --copper: #b1611e;
+    --copper-dark: #8a4a15;
+    --teal: #2e4a49;
+    --teal-soft: #d7e2e0;
+    --line: #d9d5c9;
+    --busy: #e3ddd0;
+    --busy-text: #a39c8c;
+    --radius: 4px;
+    font-family: "Iowan Old Style", "Georgia", serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  .sans {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  header {
+    padding: 28px 20px 20px;
+    border-bottom: 3px solid var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .wrench {
+    flex-shrink: 0;
+  }
+
+  .brand-text h1 {
+    font-size: 22px;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .brand-text p {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+  }
+
+  .hero {
+    padding: 40px 0 30px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .hero h2 {
+    font-size: 34px;
+    line-height: 1.15;
+    margin: 0 0 14px;
+    max-width: 15ch;
+  }
+
+  .hero p {
+    max-width: 46ch;
+    color: var(--ink-soft);
+    font-size: 16px;
+  }
+
+  .hero .accent {
+    color: var(--copper-dark);
+  }
+
+  section.step {
+    padding: 34px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  section.step:last-of-type {
+    border-bottom: none;
+  }
+
+  .step-label {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .step-num {
+    font-size: 13px;
+    color: var(--copper-dark);
+    border: 1px solid var(--copper-dark);
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .step-label h3 {
+    font-size: 18px;
+    margin: 0;
+  }
+
+  .services {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  @media (max-width: 480px) {
+    .services { grid-template-columns: 1fr; }
+    .hero h2 { font-size: 28px; }
+  }
+
+  .service-card {
+    font-family: inherit;
+    text-align: left;
+    padding: 14px 16px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--ink);
+    transition: border-color 0.15s ease;
+  }
+
+  .service-card:hover {
+    border-color: var(--copper);
+  }
+
+  .service-card.selected {
+    border-color: var(--copper-dark);
+    background: var(--teal-soft);
+  }
+
+  .service-card .dur {
+    display: block;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 3px;
+  }
+
+  .calendar-wrap {
+    opacity: 1;
+    transition: opacity 0.2s ease;
+  }
+
+  .calendar-wrap.locked {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .month-label {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+    text-transform: none;
+  }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+
+  .day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius);
+    font-size: 14px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    cursor: pointer;
+    color: var(--ink);
+  }
+
+  .day.weekday-header {
+    background: transparent;
+    border: none;
+    color: var(--ink-soft);
+    font-size: 12px;
+    cursor: default;
+  }
+
+  .day.empty {
+    background: transparent;
+    border: none;
+    cursor: default;
+  }
+
+  .day.busy {
+    background: var(--busy);
+    color: var(--busy-text);
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+
+  .day.selected {
+    background: var(--copper-dark);
+    color: #fff;
+    border-color: var(--copper-dark);
+  }
+
+  .day.today {
+    box-shadow: inset 0 0 0 1px var(--teal);
+  }
+
+  form.booking {
+    display: grid;
+    gap: 12px;
+    max-width: 420px;
+  }
+
+  label {
+    font-size: 13px;
+    color: var(--ink-soft);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-family: inherit;
+    background: var(--panel);
+  }
+
+  input:focus {
+    outline: 2px solid var(--copper);
+    outline-offset: 1px;
+  }
+
+  .submit-btn {
+    font-family: inherit;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    padding: 13px 20px;
+    border-radius: var(--radius);
+    font-size: 15px;
+    cursor: pointer;
+    width: fit-content;
+  }
+
+  .submit-btn:disabled {
+    background: var(--busy-text);
+    cursor: not-allowed;
+  }
+
+  .submit-btn:not(:disabled):hover {
+    background: var(--copper-dark);
+  }
+
+  .confirm {
+    display: none;
+    background: var(--teal);
+    color: #fff;
+    padding: 20px;
+    border-radius: var(--radius);
+    margin-top: 20px;
+  }
+
+  .confirm.show {
+    display: block;
+  }
+
+  .confirm h4 {
+    margin: 0 0 6px;
+    font-size: 17px;
+  }
+
+  .confirm p {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.9;
+  }
+
+  .note {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 6px;
+  }
+
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+</style>
+</head>
+<body class="sans">
+
+<header>
+  <svg class="wrench" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1c1b19" stroke-width="1.6">
+    <path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L3 17.7 5.3 20l6.3-6.3a4 4 0 0 0 5.1-5.4l-2.5 2.5-2-2 2.5-2.5z"/>
+  </svg>
+  <div class="brand-text">
+    <h1>Usta Xurshid — Santexnik xizmatlari</h1>
+    <p>Barcha turdagi santexnika ishlari — shahar va viloyatlarda ham</p>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <h2>Kran oqyapti yoki quvur muammosi bormi? <span class="accent">Kunini tanlang, biz kelamiz.</span></h2>
+    <p>Xizmat turini tanlang, kalendardan bo'sh kunni belgilang — qolganini o'zimiz hal qilamiz.</p>
+  </div>
+
+  <section class="step">
+    <div class="step-label">
+      <span class="step-num">1</span>
+      <h3>Qanday xizmat kerak?</h3>
+    </div>
+    <div class="services" id="services">
+      <button class="service-card" data-service="Kran ta'mirlash / almashtirish" data-dur="1">Kran ta'mirlash / almashtirish<span class="dur">~1 kun</span></button>
+      <button class="service-card" data-service="Quvur ta'mirlash" data-dur="1">Quvur ta'mirlash<span class="dur">~1 kun</span></button>
+      <button class="service-card" data-service="Isitish tizimi (katyol)" data-dur="3">Isitish tizimi (katyol)<span class="dur">~3 kun</span></button>
+      <button class="service-card" data-service="Issiq pol o'rnatish" data-dur="0" data-needs-size="true">Issiq pol o'rnatish<span class="dur">4-10 kun (maydonga qarab)</span></button>
+      <button class="service-card" data-service="Unitaz / rakovina o'rnatish" data-dur="1">Unitaz / rakovina o'rnatish<span class="dur">~1 kun</span></button>
+      <button class="service-card" data-service="Boshqa muammo" data-dur="1">Boshqa muammo<span class="dur">Kelishiladi</span></button>
+    </div>
+
+    <div class="size-question" id="sizeQuestion" style="display:none; margin-top:14px;">
+      <div class="step-label" style="margin-bottom:10px;">
+        <h3 style="font-size:15px; margin:0; color:var(--ink-soft);">Xona maydoni qancha?</h3>
+      </div>
+      <div class="services" id="sizeOptions">
+        <button class="service-card" type="button" data-size-dur="4">Kichik xona<span class="dur">30 m² gacha — 4 kun</span></button>
+        <button class="service-card" type="button" data-size-dur="7">O'rta xona<span class="dur">30-60 m² — 7 kun</span></button>
+        <button class="service-card" type="button" data-size-dur="10">Katta xona<span class="dur">60 m² dan ko'p — 10 kun</span></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="step-label">
+      <span class="step-num">2</span>
+      <h3>Qaysi kun bo'sh?</h3>
+    </div>
+    <div class="calendar-wrap locked" id="calendarWrap">
+      <div class="month-label" id="monthLabel"></div>
+      <div class="cal-grid" id="calGrid"></div>
+      <p class="note">Kulrang kunlar — band. Boshlanish kunini tanlang — ish necha kun davom etsa, o'sha kunlar avtomatik band bo'ladi.</p>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="step-label">
+      <span class="step-num">3</span>
+      <h3>Ma'lumotlaringiz</h3>
+    </div>
+    <form class="booking" id="bookingForm">
+      <div>
+        <label for="name">Ismingiz</label>
+        <input type="text" id="name" required placeholder="Ism Familiya">
+      </div>
+      <div>
+        <label for="phone">Telefon raqamingiz</label>
+        <input type="tel" id="phone" required placeholder="+998 90 123 45 67">
+      </div>
+      <button type="submit" class="submit-btn" id="submitBtn" disabled>Buyurtma berish</button>
+    </form>
+    <div class="confirm" id="confirmBox">
+      <h4>Buyurtma qabul qilindi</h4>
+      <p id="confirmText"></p>
+    </div>
+  </section>
+</main>
+
+<footer>Tel: +998 90 860 00 92 · Telegram: @xurshid_92 · Instagram: @xurshid__92<br>Demo sahifa — real ishga tushirishdan oldin sinov uchun</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBx0wih1Ud3RLhDxf81uXeKgR-ILM4TYO8",
+    authDomain: "santexnik-sayti.firebaseapp.com",
+    projectId: "santexnik-sayti",
+    storageBucket: "santexnik-sayti.firebasestorage.app",
+    messagingSenderId: "353700050015",
+    appId: "1:353700050015:web:2a421da6071346102b97ea"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+
+<script>
+(function () {
+  let selectedService = null;   // display name
+  let selectedDuration = null;  // number of days this job needs
+  let selectedStartKey = null;  // ISO date string of chosen start day
+  let bookings = [];            // [{startDate, duration, name, phone, service}]
+
+  const services = document.getElementById('services');
+  const sizeQuestion = document.getElementById('sizeQuestion');
+  const sizeOptions = document.getElementById('sizeOptions');
+  const calendarWrap = document.getElementById('calendarWrap');
+  const calGrid = document.getElementById('calGrid');
+  const monthLabel = document.getElementById('monthLabel');
+  const form = document.getElementById('bookingForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const confirmBox = document.getElementById('confirmBox');
+  const confirmText = document.getElementById('confirmText');
+
+  const weekdayNames = ['Ya', 'Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh'];
+  const monthNames = ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr'];
+  const RANGE_DAYS = 30; // ko'p kunlik ishlar bo'lgani uchun kalendarni kengaytiramiz
+
+  function toKey(d) {
+    return d.toISOString().slice(0, 10);
+  }
+
+  function addDays(dateKey, n) {
+    const d = new Date(dateKey);
+    d.setDate(d.getDate() + n);
+    return d;
+  }
+
+  async function loadBookings() {
+    try {
+      const snapshot = await db.collection('bookings').get();
+      bookings = snapshot.docs.map(doc => doc.data());
+    } catch (e) {
+      console.error('Ma\'lumotlarni yuklashda xatolik', e);
+      bookings = [];
+    }
+  }
+
+  async function saveBooking(booking) {
+    try {
+      await db.collection('bookings').add(booking);
+    } catch (e) {
+      console.error('Saqlashda xatolik', e);
+    }
+  }
+
+  // Har bir buyurtma egallagan barcha kunlar to'plamini beradi
+  function busyDaySet() {
+    const set = new Set();
+    bookings.forEach(b => {
+      for (let i = 0; i < b.duration; i++) {
+        set.add(toKey(addDays(b.startDate, i)));
+      }
+    });
+    return set;
+  }
+
+  // Berilgan kundan boshlab `duration` kun ketma-ket bo'sh ekanini tekshiradi
+  function rangeIsFree(startKey, duration, busySet) {
+    for (let i = 0; i < duration; i++) {
+      if (busySet.has(toKey(addDays(startKey, i)))) return false;
+    }
+    return true;
+  }
+
+  function renderCalendar() {
+    calGrid.innerHTML = '';
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const busySet = busyDaySet();
+
+    monthLabel.textContent = monthNames[today.getMonth()] + ' — keyingi ' + RANGE_DAYS + ' kun';
+
+    weekdayNames.forEach(w => {
+      const el = document.createElement('div');
+      el.className = 'day weekday-header';
+      el.textContent = w;
+      calGrid.appendChild(el);
+    });
+
+    const startPad = today.getDay();
+    for (let i = 0; i < startPad; i++) {
+      const el = document.createElement('div');
+      el.className = 'day empty';
+      calGrid.appendChild(el);
+    }
+
+    let selectedRangeKeys = new Set();
+    if (selectedStartKey && selectedDuration) {
+      for (let i = 0; i < selectedDuration; i++) {
+        selectedRangeKeys.add(toKey(addDays(selectedStartKey, i)));
+      }
+    }
+
+    for (let i = 0; i < RANGE_DAYS; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      const key = toKey(d);
+      const el = document.createElement('div');
+      el.className = 'day';
+      el.textContent = d.getDate();
+      if (i === 0) el.classList.add('today');
+
+      if (busySet.has(key)) {
+        el.classList.add('busy');
+      } else if (selectedDuration && !rangeIsFree(key, selectedDuration, busySet)) {
+        // bu kundan boshlasa, ish davomida band kunga urilib qoladi
+        el.classList.add('busy');
+      } else {
+        el.addEventListener('click', () => selectStartDate(key));
+      }
+
+      if (selectedRangeKeys.has(key)) el.classList.add('selected');
+      calGrid.appendChild(el);
+    }
+  }
+
+  function selectStartDate(key) {
+    selectedStartKey = key;
+    renderCalendar();
+    updateSubmitState();
+  }
+
+  function updateSubmitState() {
+    submitBtn.disabled = !(selectedService && selectedDuration && selectedStartKey);
+  }
+
+  function resetServiceSelection() {
+    selectedService = null;
+    selectedDuration = null;
+    selectedStartKey = null;
+    sizeQuestion.style.display = 'none';
+    document.querySelectorAll('.service-card.selected').forEach(c => c.classList.remove('selected'));
+    calendarWrap.classList.add('locked');
+    updateSubmitState();
+  }
+
+  services.addEventListener('click', (e) => {
+    const btn = e.target.closest('.service-card');
+    if (!btn) return;
+    document.querySelectorAll('#services .service-card.selected').forEach(c => c.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedService = btn.dataset.service;
+    selectedStartKey = null;
+
+    if (btn.dataset.needsSize === 'true') {
+      selectedDuration = null;
+      sizeQuestion.style.display = 'block';
+      calendarWrap.classList.add('locked');
+    } else {
+      selectedDuration = parseInt(btn.dataset.dur, 10);
+      sizeQuestion.style.display = 'none';
+      calendarWrap.classList.remove('locked');
+    }
+    renderCalendar();
+    updateSubmitState();
+  });
+
+  sizeOptions.addEventListener('click', (e) => {
+    const btn = e.target.closest('.service-card');
+    if (!btn) return;
+    document.querySelectorAll('#sizeOptions .service-card.selected').forEach(c => c.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedDuration = parseInt(btn.dataset.sizeDur, 10);
+    selectedStartKey = null;
+    calendarWrap.classList.remove('locked');
+    renderCalendar();
+    updateSubmitState();
+  });
+
+  // --- Telegram orqali Xurshid akaga xabar yuborish ---
+  // Bot yaratilgach, quyidagi ikki qatorga TOKEN va CHAT_ID qo'yiladi.
+  const TELEGRAM_BOT_TOKEN = '8763192770:AAEEuaayH-97kYubDG35qX8JtSJxpH_HIG8';
+  const TELEGRAM_CHAT_ID = '900906352';
+
+  async function notifyTelegram(booking, dateRangeText) {
+    if (TELEGRAM_BOT_TOKEN.includes('BU_YERGA')) return; // hali sozlanmagan
+    const text = `Yangi buyurtma!\nXizmat: ${booking.service}\nSana: ${dateRangeText}\nMijoz: ${booking.name}\nTel: ${booking.phone}`;
+    try {
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text })
+      });
+    } catch (e) {
+      console.error('Telegram xabari yuborilmadi', e);
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    if (!name || !phone || !selectedService || !selectedDuration || !selectedStartKey) return;
+
+    await loadBookings(); // boshqa odam shu orada band qilib qo'yishi mumkin, qayta tekshiramiz
+    const busySet = busyDaySet();
+    if (!rangeIsFree(selectedStartKey, selectedDuration, busySet)) {
+      alert('Kechirasiz, bu kunlar band bo\'lib qoldi. Boshqa kun tanlang.');
+      selectedStartKey = null;
+      renderCalendar();
+      updateSubmitState();
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Yuborilmoqda...';
+
+    const newBooking = {
+      startDate: selectedStartKey,
+      duration: selectedDuration,
+      name,
+      phone,
+      service: selectedService
+    };
+    bookings.push(newBooking);
+    await saveBooking(newBooking);
+
+    const startD = new Date(selectedStartKey);
+    const endD = addDays(selectedStartKey, selectedDuration - 1);
+    const dateRangeText = selectedDuration > 1
+      ? `${startD.getDate()}-${monthNames[startD.getMonth()]} dan ${endD.getDate()}-${monthNames[endD.getMonth()]} gacha (${selectedDuration} kun)`
+      : `${startD.getDate()}-${monthNames[startD.getMonth()]}`;
+
+    confirmText.textContent = `${name}, "${selectedService}" xizmati uchun ${dateRangeText} kuniga buyurtmangiz qabul qilindi. Usta shu raqamga qo'ng'iroq qiladi: ${phone}.`;
+    confirmBox.classList.add('show');
+    form.style.display = 'none';
+
+    notifyTelegram({ service: selectedService, name, phone }, dateRangeText);
+    renderCalendar();
+  });
+
+  (async function init() {
+    await loadBookings();
+    resetServiceSelection();
+    renderCalendar();
+  })();
+})();
+</script>
+
+</body>
+</html>
