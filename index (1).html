@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Usta Xurshid — Santexnik xizmatlari</title>
+<style>
+  :root {
+    --bg: #eeece4;
+    --panel: #ffffff;
+    --ink: #1c1b19;
+    --ink-soft: #56534c;
+    --copper: #b1611e;
+    --copper-dark: #8a4a15;
+    --teal: #2e4a49;
+    --teal-soft: #d7e2e0;
+    --line: #d9d5c9;
+    --busy: #e3ddd0;
+    --busy-text: #a39c8c;
+    --radius: 4px;
+    font-family: "Iowan Old Style", "Georgia", serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  .sans {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  header {
+    padding: 28px 20px 20px;
+    border-bottom: 3px solid var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .wrench {
+    flex-shrink: 0;
+  }
+
+  .brand-text h1 {
+    font-size: 22px;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .brand-text p {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+  }
+
+  .hero {
+    padding: 40px 0 30px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .hero h2 {
+    font-size: 34px;
+    line-height: 1.15;
+    margin: 0 0 14px;
+    max-width: 15ch;
+  }
+
+  .hero p {
+    max-width: 46ch;
+    color: var(--ink-soft);
+    font-size: 16px;
+  }
+
+  .hero .accent {
+    color: var(--copper-dark);
+  }
+
+  section.step {
+    padding: 34px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  section.step:last-of-type {
+    border-bottom: none;
+  }
+
+  .step-label {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .step-num {
+    font-size: 13px;
+    color: var(--copper-dark);
+    border: 1px solid var(--copper-dark);
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .step-label h3 {
+    font-size: 18px;
+    margin: 0;
+  }
+
+  .services {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  @media (max-width: 480px) {
+    .services { grid-template-columns: 1fr; }
+    .hero h2 { font-size: 28px; }
+  }
+
+  .service-card {
+    font-family: inherit;
+    text-align: left;
+    padding: 14px 16px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--ink);
+    transition: border-color 0.15s ease;
+  }
+
+  .service-card:hover {
+    border-color: var(--copper);
+  }
+
+  .service-card.selected {
+    border-color: var(--copper-dark);
+    background: var(--teal-soft);
+  }
+
+  .service-card .dur {
+    display: block;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 3px;
+  }
+
+  .calendar-wrap {
+    opacity: 1;
+    transition: opacity 0.2s ease;
+  }
+
+  .calendar-wrap.locked {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .month-label {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+    text-transform: none;
+  }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+
+  .day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius);
+    font-size: 14px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    cursor: pointer;
+    color: var(--ink);
+  }
+
+  .day.weekday-header {
+    background: transparent;
+    border: none;
+    color: var(--ink-soft);
+    font-size: 12px;
+    cursor: default;
+  }
+
+  .day.empty {
+    background: transparent;
+    border: none;
+    cursor: default;
+  }
+
+  .day.busy {
+    background: var(--busy);
+    color: var(--busy-text);
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+
+  .day.selected {
+    background: var(--copper-dark);
+    color: #fff;
+    border-color: var(--copper-dark);
+  }
+
+  .day.today {
+    box-shadow: inset 0 0 0 1px var(--teal);
+  }
+
+  form.booking {
+    display: grid;
+    gap: 12px;
+    max-width: 420px;
+  }
+
+  label {
+    font-size: 13px;
+    color: var(--ink-soft);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-family: inherit;
+    background: var(--panel);
+  }
+
+  input:focus {
+    outline: 2px solid var(--copper);
+    outline-offset: 1px;
+  }
+
+  .submit-btn {
+    font-family: inherit;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    padding: 13px 20px;
+    border-radius: var(--radius);
+    font-size: 15px;
+    cursor: pointer;
+    width: fit-content;
+  }
+
+  .submit-btn:disabled {
+    background: var(--busy-text);
+    cursor: not-allowed;
+  }
+
+  .submit-btn:not(:disabled):hover {
+    background: var(--copper-dark);
+  }
+
+  .confirm {
+    display: none;
+    background: var(--teal);
+    color: #fff;
+    padding: 20px;
+    border-radius: var(--radius);
+    margin-top: 20px;
+  }
+
+  .confirm.show {
+    display: block;
+  }
+
+  .confirm h4 {
+    margin: 0 0 6px;
+    font-size: 17px;
+  }
+
+  .confirm p {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.9;
+  }
+
+  .note {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 6px;
+  }
+
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  footer .credit {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    display: inline-block;
+    font-size: 11px;
+    opacity: 0.85;
+  }
+
+  footer .credit a {
+    color: var(--copper-dark);
+    text-decoration: none;
+  }
+
+  footer .credit a:hover {
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body class="sans">
+
+<header>
+  <svg class="wrench" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1c1b19" stroke-width="1.6">
+    <path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L3 17.7 5.3 20l6.3-6.3a4 4 0 0 0 5.1-5.4l-2.5 2.5-2-2 2.5-2.5z"/>
+  </svg>
+  <div class="brand-text">
+    <h1>Usta Xurshid — Santexnik xizmatlari</h1>
+    <p>Barcha turdagi santexnika ishlari — shahar va viloyatlarda ham</p>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <h2>Kran oqyapti yoki quvur muammosi bormi? <span class="accent">Kunini tanlang, biz kelamiz.</span></h2>
+    <p>Xizmat turini tanlang, ma'lumotlaringizni qoldiring — biz siz bilan bog'lanamiz.</p>
+  </div>
+
+  <section class="step">
+    <div class="step-label">
+      <span class="step-num">1</span>
+      <h3>Qanday xizmat kerak?</h3>
+    </div>
+    <div class="services" id="services">
+      <button class="service-card" data-service="Kran ta'mirlash / almashtirish" data-dur="1">Kran ta'mirlash / almashtirish<span class="dur">~1 kun</span></button>
+      <button class="service-card" data-service="Quvur ta'mirlash" data-dur="1">Quvur ta'mirlash<span class="dur">~1 kun</span></button>
+      <button class="service-card" data-service="Isitish tizimi (katyol)" data-dur="3">Isitish tizimi (katyol)<span class="dur">~3 kun</span></button>
+      <button class="service-card" data-service="Unitaz / rakovina o'rnatish" data-dur="1">Unitaz / rakovina o'rnatish<span class="dur">~1 kun</span></button>
+      <button class="service-card" data-service="Boshqa muammo" data-dur="1">Boshqa muammo<span class="dur">Kelishiladi</span></button>
+    </div>
+  </section>
+
+  <section class="step">
+    <div class="step-label">
+      <span class="step-num">2</span>
+      <h3>Ma'lumotlaringiz</h3>
+    </div>
+    <form class="booking" id="bookingForm">
+      <div>
+        <label for="name">Ismingiz</label>
+        <input type="text" id="name" required placeholder="Ism Familiya">
+      </div>
+      <div>
+        <label for="phone">Telefon raqamingiz</label>
+        <input type="tel" id="phone" required placeholder="+998 90 123 45 67">
+      </div>
+      <div>
+        <label for="whenNeeded">Qachon kerak? (ixtiyoriy)</label>
+        <input type="text" id="whenNeeded" placeholder="Masalan: Ertaga, shu hafta ichida">
+      </div>
+      <button type="submit" class="submit-btn" id="submitBtn" disabled>Buyurtma berish</button>
+    </form>
+    <div class="confirm" id="confirmBox">
+      <h4>Buyurtma qabul qilindi</h4>
+      <p id="confirmText"></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Tel: +998 90 860 00 92 · Telegram: @xurshid_92 · Instagram: @xurshid__92
+  <div class="credit">
+    Shunday sayt kerak bo'lsa, bog'laning: Telegram <a href="https://t.me/mf0811">@mf0811</a> · <a href="tel:+998916891108">+998 91 689 11 08</a>
+  </div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBx0wih1Ud3RLhDxf81uXeKgR-ILM4TYO8",
+    authDomain: "santexnik-sayti.firebaseapp.com",
+    projectId: "santexnik-sayti",
+    storageBucket: "santexnik-sayti.firebasestorage.app",
+    messagingSenderId: "353700050015",
+    appId: "1:353700050015:web:2a421da6071346102b97ea"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+
+<script>
+(function () {
+  let selectedService = null;   // display name
+  let selectedDuration = null;  // faqat Telegram xabarida ko'rsatish uchun (rejalashtirishda ishlatilmaydi)
+
+  const services = document.getElementById('services');
+  const form = document.getElementById('bookingForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const confirmBox = document.getElementById('confirmBox');
+  const confirmText = document.getElementById('confirmText');
+
+  function updateSubmitState() {
+    submitBtn.disabled = !selectedService;
+  }
+
+  services.addEventListener('click', (e) => {
+    const btn = e.target.closest('.service-card');
+    if (!btn) return;
+    document.querySelectorAll('#services .service-card.selected').forEach(c => c.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedService = btn.dataset.service;
+    selectedDuration = parseInt(btn.dataset.dur, 10) || null;
+    updateSubmitState();
+  });
+
+  // --- Telegram orqali Xurshid akaga xabar yuborish ---
+  const TELEGRAM_BOT_TOKEN = '8763192770:AAEEuaayH-97kYubDG35qX8JtSJxpH_HIG8';
+  const TELEGRAM_CHAT_ID = '900906352';
+
+  async function notifyTelegram(booking) {
+    if (TELEGRAM_BOT_TOKEN.includes('BU_YERGA')) return; // hali sozlanmagan
+    const whenLine = booking.whenNeeded ? `\nQachon kerak: ${booking.whenNeeded}` : '';
+    const durLine = booking.estimatedDays ? `\nTaxminiy davomiylik: ${booking.estimatedDays} kun` : '';
+    const text = `Yangi buyurtma!\nXizmat: ${booking.service}\nMijoz: ${booking.name}\nTel: ${booking.phone}${whenLine}${durLine}`;
+    try {
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text })
+      });
+    } catch (e) {
+      console.error('Telegram xabari yuborilmadi', e);
+    }
+  }
+
+  async function saveBooking(booking) {
+    try {
+      await db.collection('bookings').add(booking);
+    } catch (e) {
+      console.error('Saqlashda xatolik', e);
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const whenNeeded = document.getElementById('whenNeeded').value.trim();
+    if (!name || !phone || !selectedService) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Yuborilmoqda...';
+
+    const newBooking = {
+      name,
+      phone,
+      service: selectedService,
+      whenNeeded: whenNeeded || null,
+      estimatedDays: selectedDuration || null,
+      createdAt: new Date().toISOString()
+    };
+
+    await saveBooking(newBooking);
+    notifyTelegram(newBooking);
+
+    confirmText.textContent = `${name}, "${selectedService}" xizmati uchun buyurtmangiz qabul qilindi. Usta shu raqamga qo'ng'iroq qiladi: ${phone}.`;
+    confirmBox.classList.add('show');
+    form.style.display = 'none';
+  });
+})();
+</script>
+
+</body>
+</html>
