@@ -441,19 +441,13 @@
   });
 
   // --- Telegram orqali Xurshid akaga xabar yuborish ---
-  const TELEGRAM_BOT_TOKEN = '8763192770:AAEEuaayH-97kYubDG35qX8JtSJxpH_HIG8';
-  const TELEGRAM_CHAT_ID = '900906352';
-
+  // Token endi saytda emas: xabar serverdagi /api/order funksiyasi orqali yuboriladi.
   async function notifyTelegram(booking) {
-    if (TELEGRAM_BOT_TOKEN.includes('BU_YERGA')) return; // hali sozlanmagan
-    const whenLine = booking.whenNeeded ? `\nQachon kerak: ${booking.whenNeeded}` : '';
-    const durLine = booking.estimatedDays ? `\nTaxminiy davomiylik: ${booking.estimatedDays} kun` : '';
-    const text = `Yangi buyurtma!\nXizmat: ${booking.service}\nMijoz: ${booking.name}\nTel: ${booking.phone}${whenLine}${durLine}`;
     try {
-      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      await fetch('/api/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text })
+        body: JSON.stringify(booking)
       });
     } catch (e) {
       console.error('Telegram xabari yuborilmadi', e);
